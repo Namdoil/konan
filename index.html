@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나의 도구 모음</title>
+<style>
+  :root {
+    --bg: #f5f6fa;
+    --card: #ffffff;
+    --text: #1f2333;
+    --muted: #6b7085;
+    --border: #e3e5ee;
+    --fun: #ff7a59;
+    --news: #2f80ed;
+    --work: #27ae60;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161f;
+      --card: #1d2030;
+      --text: #eceef5;
+      --muted: #9a9fb5;
+      --border: #2c3044;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 56px 20px 40px; }
+  header { margin-bottom: 40px; }
+  header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+  header p { color: var(--muted); margin-top: 6px; }
+
+  section { margin-bottom: 36px; }
+  .section-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1.15rem; font-weight: 700; margin-bottom: 14px;
+  }
+  .section-title .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  a.card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 18px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    text-decoration: none; color: inherit;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  a.card:hover, a.card:focus-visible {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 22px rgba(0,0,0,.08);
+    border-color: var(--accent);
+    outline: none;
+  }
+  .icon {
+    flex: 0 0 48px; height: 48px; border-radius: 12px;
+    display: grid; place-items: center; font-size: 1.6rem;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+  .card h3 { font-size: 1.02rem; font-weight: 700; }
+  .card p { font-size: .88rem; color: var(--muted); }
+  .arrow { margin-left: auto; color: var(--muted); font-size: 1.2rem; transition: transform .15s; }
+  a.card:hover .arrow { transform: translateX(3px); color: var(--accent); }
+
+  footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🧰 나의 도구 모음</h1>
+    <p>필요한 기능을 눌러 바로 이동하세요.</p>
+  </header>
+
+  <main id="menu"></main>
+
+  <footer>© <span id="year"></span> My Tools</footer>
+</div>
+
+<script>
+  /* ================================================================
+     ▼ 메뉴 설정 — 각 기능의 링크(url)를 실제 주소로 바꿔 주세요.
+       같은 저장소의 폴더라면 "ladder/" 처럼 상대 경로,
+       다른 저장소/사이트라면 "https://..." 전체 주소를 넣으면 됩니다.
+     ================================================================ */
+  const MENU = [
+    {
+      category: "재미", color: "var(--fun)",
+      items: [
+        { icon: "🪜", title: "사다리타기",        desc: "참가자와 결과를 넣고 사다리를 타요", url: "ladder/" },
+        { icon: "🎯", title: "룰렛추첨기",        desc: "룰렛을 돌려 무작위로 뽑아요",        url: "roulette/" },
+        { icon: "🍱", title: "날씨 기반 점심고르기", desc: "오늘 날씨에 어울리는 점심 추천",     url: "https://script.google.com/macros/s/AKfycbyjF5ydG6EaE2_Issp3jWXgnoOV6gq0CMzc8KTkSm7Ms0Oeiu6dQOcGhgu7zzSRzEY/exec" },
+      ],
+    },
+    {
+      category: "뉴스", color: "var(--news)",
+      items: [
+        { icon: "⚡", title: "한전 뉴스 대시보드", desc: "한국전력 관련 최신 뉴스 모아보기",   url: "https://script.google.com/macros/s/AKfycbwMyDbqAOtjSRLFdkrjO4MtKLEeeEg3nBNBiWzXDC5BY-Nm75BF-AsV_QKQRgtyQM6LDw/exec" },
+      ],
+    },
+    {
+      category: "업무", color: "var(--work)",
+      items: [
+        { icon: "📄", title: "PDF병합기",         desc: "여러 PDF 파일을 하나로 합쳐요",      url: "pdf-merge/" },
+      ],
+    },
+  ];
+  /* ================================================================ */
+
+  const menu = document.getElementById("menu");
+  MENU.forEach(group => {
+    const sec = document.createElement("section");
+    sec.style.setProperty("--accent", group.color);
+    sec.innerHTML = `
+      <h2 class="section-title"><span class="dot" style="background:${group.color}"></span>${group.category}</h2>
+      <div class="grid">
+        ${group.items.map(it => `
+          <a class="card" href="${it.url}"${it.url.startsWith("http") ? ' target="_blank" rel="noopener"' : ""}>
+            <div class="icon">${it.icon}</div>
+            <div>
+              <h3>${it.title}</h3>
+              <p>${it.desc}</p>
+            </div>
+            <span class="arrow">→</span>
+          </a>`).join("")}
+      </div>`;
+    menu.appendChild(sec);
+  });
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
